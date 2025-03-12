@@ -1,101 +1,166 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState } from "react"
+import { Gift, TrendingUp, Users } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+interface CalculationResult {
+  averagePrice: number
+  additionalAmount: number
+  expectedReturn: number
+  recommendedQuantity: number
+  totalInvestment: number
+}
+
+export default function LandingPage() {
+  const [values, setValues] = useState({
+    initialPrice: 50000,
+    quantity: 10,
+    currentPrice: 45000,
+    targetPrice: 48000
+  })
+
+  const [result, setResult] = useState<CalculationResult>({
+    averagePrice: 47500,
+    additionalAmount: 450000,
+    expectedReturn: 1.05,
+    recommendedQuantity: 10,
+    totalInvestment: 950000
+  })
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    setValues(prev => ({
+      ...prev,
+      [id.replace('-', '')]: Number(value)
+    }))
+  }
+
+  const calculateResults = () => {
+    const { initialPrice, quantity, currentPrice, targetPrice } = values
+    
+    // 추가 매수 수량 계산 (간단한 예시 - 실제 전략에 맞게 수정 필요)
+    const recommendedQuantity = Math.round(quantity * (initialPrice / currentPrice))
+    
+    // 총 투자금액
+    const initialInvestment = initialPrice * quantity
+    const additionalAmount = currentPrice * recommendedQuantity
+    const totalInvestment = initialInvestment + additionalAmount
+    
+    // 평균 매수가
+    const totalQuantity = quantity + recommendedQuantity
+    const averagePrice = totalInvestment / totalQuantity
+    
+    // 예상 수익률
+    const expectedReturn = ((targetPrice - averagePrice) / averagePrice) * 100
+
+    setResult({
+      averagePrice: Math.round(averagePrice),
+      additionalAmount: Math.round(additionalAmount),
+      expectedReturn: Number(expectedReturn.toFixed(2)),
+      recommendedQuantity,
+      totalInvestment: Math.round(totalInvestment)
+    })
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* ... existing hero section ... */}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Calculator Section */}
+      <section className="container mx-auto px-4 py-16 bg-gray-50 rounded-xl">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-8">
+            물타기 계산기
+          </h2>
+          <div className="grid gap-6">
+            <div className="grid gap-2">
+              <Label htmlFor="initial-price">최초 매수가</Label>
+              <Input
+                id="initial-price"
+                type="number"
+                value={values.initialPrice}
+                onChange={handleInputChange}
+                placeholder="최초 매수 가격을 입력하세요"
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="quantity">수량</Label>
+              <Input
+                id="quantity"
+                type="number"
+                value={values.quantity}
+                onChange={handleInputChange}
+                placeholder="매수 수량을 입력하세요"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="current-price">현재가</Label>
+              <Input
+                id="current-price"
+                type="number"
+                value={values.currentPrice}
+                onChange={handleInputChange}
+                placeholder="현재 가격을 입력하세요"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="target-price">목표가</Label>
+              <Input
+                id="target-price"
+                type="number"
+                value={values.targetPrice}
+                onChange={handleInputChange}
+                placeholder="목표 가격을 입력하세요"
+              />
+            </div>
+
+            <Button className="w-full" size="lg" onClick={calculateResults}>
+              계산하기
+            </Button>
+
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>계산 결과</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>평균 매수가:</span>
+                    <span className="font-semibold">{result.averagePrice.toLocaleString()}원</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>필요 추가 매수금액:</span>
+                    <span className="font-semibold">{result.additionalAmount.toLocaleString()}원</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>예상 수익률:</span>
+                    <span className={`font-semibold ${result.expectedReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {result.expectedReturn >= 0 ? '+' : ''}{result.expectedReturn}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>추천 물타기 수량:</span>
+                    <span className="font-semibold">{result.recommendedQuantity}주</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>총 투자금액:</span>
+                    <span className="font-semibold">{result.totalInvestment.toLocaleString()}원</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      {/* ... existing CTA section ... */}
     </div>
-  );
+  )
 }
