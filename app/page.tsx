@@ -1,11 +1,10 @@
 'use client'
 
-import { useState } from "react"
-import { Gift, TrendingUp, Users } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useState } from "react"
 
 interface CalculationResult {
   averagePrice: number
@@ -35,26 +34,22 @@ export default function LandingPage() {
     const { id, value } = e.target
     setValues(prev => ({
       ...prev,
-      [id.replace('-', '')]: Number(value)
+      [id]: Number(value)
     }))
   }
 
   const calculateResults = () => {
     const { initialPrice, quantity, currentPrice, targetPrice } = values
     
-    // 추가 매수 수량 계산 (간단한 예시 - 실제 전략에 맞게 수정 필요)
     const recommendedQuantity = Math.round(quantity * (initialPrice / currentPrice))
     
-    // 총 투자금액
     const initialInvestment = initialPrice * quantity
     const additionalAmount = currentPrice * recommendedQuantity
     const totalInvestment = initialInvestment + additionalAmount
     
-    // 평균 매수가
     const totalQuantity = quantity + recommendedQuantity
     const averagePrice = totalInvestment / totalQuantity
     
-    // 예상 수익률
     const expectedReturn = ((targetPrice - averagePrice) / averagePrice) * 100
 
     setResult({
@@ -68,9 +63,17 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* ... existing hero section ... */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+            선물 옵션 물타기 전략
+          </h1>
+          <p className="mt-6 text-lg leading-8 text-gray-600">
+            안전하고 효율적인 선물 옵션 물타기로 수익을 극대화하세요
+          </p>
+        </div>
+      </section>
 
-      {/* Calculator Section */}
       <section className="container mx-auto px-4 py-16 bg-gray-50 rounded-xl">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-8">
@@ -78,9 +81,9 @@ export default function LandingPage() {
           </h2>
           <div className="grid gap-6">
             <div className="grid gap-2">
-              <Label htmlFor="initial-price">최초 매수가</Label>
+              <Label htmlFor="initialPrice">최초 매수가</Label>
               <Input
-                id="initial-price"
+                id="initialPrice"
                 type="number"
                 value={values.initialPrice}
                 onChange={handleInputChange}
@@ -100,9 +103,9 @@ export default function LandingPage() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="current-price">현재가</Label>
+              <Label htmlFor="currentPrice">현재가</Label>
               <Input
-                id="current-price"
+                id="currentPrice"
                 type="number"
                 value={values.currentPrice}
                 onChange={handleInputChange}
@@ -111,9 +114,9 @@ export default function LandingPage() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="target-price">목표가</Label>
+              <Label htmlFor="targetPrice">목표가</Label>
               <Input
-                id="target-price"
+                id="targetPrice"
                 type="number"
                 value={values.targetPrice}
                 onChange={handleInputChange}
@@ -160,7 +163,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ... existing CTA section ... */}
     </div>
   )
 }
