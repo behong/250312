@@ -4,7 +4,46 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react"
+import emailjs from '@emailjs/browser';
+
+// ... existing code ...
+
+const handleSubmit = async () => {
+  if (!contactForm.name || !contactForm.email || !contactForm.message) {
+    alert('모든 필드를 입력해주세요.');
+    return;
+  }
+
+  setIsSubmitting(true);
+  try {
+    await emailjs.send(
+      'service_xxxxxxx', // EmailJS Service ID
+      'template_xxxxxxx', // EmailJS Template ID
+      {
+        from_name: contactForm.name,
+        from_email: contactForm.email,
+        message: contactForm.message,
+        to_email: 'sijm@naver.com',
+      },
+      'xxxxxxxxxxxxx' // EmailJS Public Key
+    );
+    alert('문의가 성공적으로 전송되었습니다.');
+    setContactForm({ name: '', email: '', message: '' });
+  } catch (error) {
+    console.error('Email send error:', error);
+    alert('문의 전송에 실패했습니다. 다시 시도해주세요.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+interface ContactForm {
+  name: string;
+  email: string;
+  message: string;
+}
 
 interface CalculationResult {
   averagePrice: number
@@ -37,6 +76,13 @@ export default function LandingPage() {
       [id]: Number(value)
     }))
   }
+// ... inside your component, with other useState declarations ...
+const [contactForm, setContactForm] = useState<ContactForm>({
+  name: '',
+  email: '',
+  message: ''
+});
+const [isSubmitting, setIsSubmitting] = useState(false);
 
   const calculateResults = () => {
     const { initialPrice, quantity, currentPrice, targetPrice } = values
@@ -162,7 +208,54 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      // ... existing code ...
 
+{/* Contact Section */}
+<section className="container mx-auto px-4 py-16">
+  <div className="max-w-2xl mx-auto">
+    <h2 className="text-3xl font-bold text-center mb-8">
+      이메일 문의
+    </h2>
+    <div className="grid gap-6">
+      <div className="grid gap-2">
+        <Label htmlFor="name">이름</Label>
+        <Input
+          id="name"
+          placeholder="이름을 입력하세요"
+        />
+      </div>
+      
+      <div className="grid gap-2">
+        <Label htmlFor="email">이메일</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="이메일을 입력하세요"
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="message">문의 내용</Label>
+        <Textarea
+          id="message"
+          placeholder="문의하실 내용을 입력하세요"
+          className="min-h-[150px]"
+        />
+      </div>
+
+      <Button className="w-full" size="lg">
+        문의하기
+      </Button>
     </div>
-  )
+  </div>
+</section>
+
+{/* Footer */}
+<footer className="container mx-auto px-4 py-8 mt-16 border-t">
+  <div className="text-center text-gray-600">
+    <p>© 2024 선물옵션 물타기 전략. All rights reserved.</p>
+  </div>
+</footer>
+</div>
+)
 }
