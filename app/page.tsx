@@ -1,43 +1,29 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import emailjs from '@emailjs/browser'
+import { Gift, TrendingUp, Users } from "lucide-react"
 import { useState } from "react"
-import emailjs from '@emailjs/browser';
 
-// ... existing code ...
+// EmailJS 초기화
+emailjs.init("lPUtlOMiUVNhV03bL") // 여기에 Public Key 입력
 
-const handleSubmit = async () => {
-  if (!contactForm.name || !contactForm.email || !contactForm.message) {
-    alert('모든 필드를 입력해주세요.');
-    return;
-  }
+interface CalculatorValues {
+  initialPrice: string;
+  quantity: string;
+  currentPrice: string;
+  targetPrice: string;
+}
 
-  setIsSubmitting(true);
-  try {
-    await emailjs.send(
-      'service_xxxxxxx', // EmailJS Service ID
-      'template_xxxxxxx', // EmailJS Template ID
-      {
-        from_name: contactForm.name,
-        from_email: contactForm.email,
-        message: contactForm.message,
-        to_email: 'sijm@naver.com',
-      },
-      'xxxxxxxxxxxxx' // EmailJS Public Key
-    );
-    alert('문의가 성공적으로 전송되었습니다.');
-    setContactForm({ name: '', email: '', message: '' });
-  } catch (error) {
-    console.error('Email send error:', error);
-    alert('문의 전송에 실패했습니다. 다시 시도해주세요.');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+interface CalculationResult {
+  averagePrice: number;
+  additionalInvestment: number;
+  expectedReturn: number;
+}
 
 interface ContactForm {
   name: string;
@@ -45,70 +31,98 @@ interface ContactForm {
   message: string;
 }
 
-interface CalculationResult {
-  averagePrice: number
-  additionalAmount: number
-  expectedReturn: number
-  recommendedQuantity: number
-  totalInvestment: number
-}
-
 export default function LandingPage() {
-  const [values, setValues] = useState({
-    initialPrice: 50000,
-    quantity: 10,
-    currentPrice: 45000,
-    targetPrice: 48000
-  })
+  const [values, setValues] = useState<CalculatorValues>({
+    initialPrice: '',
+    quantity: '',
+    currentPrice: '',
+    targetPrice: ''
+  });
 
   const [result, setResult] = useState<CalculationResult>({
-    averagePrice: 47500,
-    additionalAmount: 450000,
-    expectedReturn: 1.05,
-    recommendedQuantity: 10,
-    totalInvestment: 950000
-  })
+    averagePrice: 0,
+    additionalInvestment: 0,
+    expectedReturn: 0
+  });
+
+  const [contactForm, setContactForm] = useState<ContactForm>({
+    name: '',
+    email: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
+    const { id, value } = e.target;
     setValues(prev => ({
       ...prev,
-      [id]: Number(value)
-    }))
-  }
-// ... inside your component, with other useState declarations ...
-const [contactForm, setContactForm] = useState<ContactForm>({
-  name: '',
-  email: '',
-  message: ''
-});
-const [isSubmitting, setIsSubmitting] = useState(false);
+      [id]: value
+    }));
+  };
 
   const calculateResults = () => {
-    const { initialPrice, quantity, currentPrice, targetPrice } = values
-    
-    const recommendedQuantity = Math.round(quantity * (initialPrice / currentPrice))
-    
-    const initialInvestment = initialPrice * quantity
-    const additionalAmount = currentPrice * recommendedQuantity
-    const totalInvestment = initialInvestment + additionalAmount
-    
-    const totalQuantity = quantity + recommendedQuantity
-    const averagePrice = totalInvestment / totalQuantity
-    
-    const expectedReturn = ((targetPrice - averagePrice) / averagePrice) * 100
+    const initial = Number(values.initialPrice);
+    const qty = Number(values.quantity);
+    const current = Number(values.currentPrice);
+    const target = Number(values.targetPrice);
+
+    if (!initial || !qty || !current || !target) {
+      alert('모든 필드를 올바르게 입력해주세요.');
+      return;
+    }
+
+    const averagePrice = (initial + current) / 2;
+    const additionalInvestment = (current * qty) - (initial * qty);
+    const expectedReturn = ((target - averagePrice) / averagePrice) * 100;
 
     setResult({
-      averagePrice: Math.round(averagePrice),
-      additionalAmount: Math.round(additionalAmount),
-      expectedReturn: Number(expectedReturn.toFixed(2)),
-      recommendedQuantity,
-      totalInvestment: Math.round(totalInvestment)
-    })
-  }
+      averagePrice,
+      additionalInvestment,
+      expectedReturn
+    });
+  };
+
+  const handleContactChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target;
+    setContactForm(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!contactForm.name || !contactForm.email || !contactForm.message) {
+      alert('모든 필드를 입력해주세요.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await emailjs.send(
+        'service_fwt87xw',  // 여기에 Service ID 입력
+        'template_ahqde8b', // 여기에 Template ID 입력
+        {
+          from_name: contactForm.name,
+          from_email: contactForm.email,
+          message: contactForm.message,
+        },
+        'lPUtlOMiUVNhV03bL'  // 여기에 Public Key 입력
+      );
+      alert('상담 신청이 성공적으로 전송되었습니다.');
+      setContactForm({ name: '', email: '', message: '' });
+    } catch (error) {
+      console.error('Email send error:', error);
+      alert('상담 신청 전송에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Hero Section */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
@@ -117,9 +131,68 @@ const [isSubmitting, setIsSubmitting] = useState(false);
           <p className="mt-6 text-lg leading-8 text-gray-600">
             안전하고 효율적인 선물 옵션 물타기로 수익을 극대화하세요
           </p>
+          <div className="mt-10">
+            <Button 
+              size="lg"
+              onClick={() => {
+                const element = document.querySelector('#contact-section');
+                element?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              시작하기
+            </Button>
+          </div>
         </div>
       </section>
 
+      {/* Features Section */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                수익 극대화
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>
+                체계적인 물타기 전략으로 손실은 최소화하고 수익은 극대화합니다
+              </CardDescription>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Gift className="h-5 w-5" />
+                맞춤형 전략
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>
+                개인의 투자 성향과 자금력에 맞는 최적의 물타기 전략을 제시합니다
+              </CardDescription>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                전문가 지원
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>
+                경험 많은 전문가들의 실시간 자문으로 안전한 투자를 지원합니다
+              </CardDescription>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Calculator Section */}
       <section className="container mx-auto px-4 py-16 bg-gray-50 rounded-xl">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-8">
@@ -186,21 +259,11 @@ const [isSubmitting, setIsSubmitting] = useState(false);
                   </div>
                   <div className="flex justify-between">
                     <span>필요 추가 매수금액:</span>
-                    <span className="font-semibold">{result.additionalAmount.toLocaleString()}원</span>
+                    <span className="font-semibold">{result.additionalInvestment.toLocaleString()}원</span>
                   </div>
                   <div className="flex justify-between">
                     <span>예상 수익률:</span>
-                    <span className={`font-semibold ${result.expectedReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {result.expectedReturn >= 0 ? '+' : ''}{result.expectedReturn}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>추천 물타기 수량:</span>
-                    <span className="font-semibold">{result.recommendedQuantity}주</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>총 투자금액:</span>
-                    <span className="font-semibold">{result.totalInvestment.toLocaleString()}원</span>
+                    <span className="font-semibold text-green-600">{result.expectedReturn.toFixed(2)}%</span>
                   </div>
                 </div>
               </CardContent>
@@ -208,54 +271,79 @@ const [isSubmitting, setIsSubmitting] = useState(false);
           </div>
         </div>
       </section>
-      // ... existing code ...
 
-{/* Contact Section */}
-<section className="container mx-auto px-4 py-16">
-  <div className="max-w-2xl mx-auto">
-    <h2 className="text-3xl font-bold text-center mb-8">
-      이메일 문의
-    </h2>
-    <div className="grid gap-6">
-      <div className="grid gap-2">
-        <Label htmlFor="name">이름</Label>
-        <Input
-          id="name"
-          placeholder="이름을 입력하세요"
-        />
-      </div>
-      
-      <div className="grid gap-2">
-        <Label htmlFor="email">이메일</Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="이메일을 입력하세요"
-        />
-      </div>
+      {/* Contact Section */}
+      <section id="contact-section" className="container mx-auto px-4 py-16">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-8">
+            무료 상담 신청
+          </h2>
+          <div className="grid gap-6">
+            <div className="grid gap-2">
+              <Label htmlFor="name">이름</Label>
+              <Input
+                id="name"
+                value={contactForm.name}
+                onChange={handleContactChange}
+                placeholder="이름을 입력하세요"
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="email">이메일</Label>
+              <Input
+                id="email"
+                type="email"
+                value={contactForm.email}
+                onChange={handleContactChange}
+                placeholder="이메일을 입력하세요"
+              />
+            </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="message">문의 내용</Label>
-        <Textarea
-          id="message"
-          placeholder="문의하실 내용을 입력하세요"
-          className="min-h-[150px]"
-        />
-      </div>
+            <div className="grid gap-2">
+              <Label htmlFor="message">문의 내용</Label>
+              <Textarea
+                id="message"
+                value={contactForm.message}
+                onChange={handleContactChange}
+                placeholder="문의하실 내용을 입력하세요"
+                className="min-h-[150px]"
+              />
+            </div>
 
-      <Button className="w-full" size="lg">
-        문의하기
-      </Button>
+            <Button 
+              className="w-full" 
+              size="lg" 
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? '전송 중...' : '상담 신청하기'}
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="bg-gray-900 rounded-2xl p-8 text-center text-white">
+          <h2 className="text-3xl font-bold mb-4">
+            지금 바로 시작하세요
+          </h2>
+          <p className="mb-6">
+            체계적인 물타기 전략으로 더 나은 투자 결과를 만들어보세요
+          </p>
+          <Button 
+            variant="secondary" 
+            size="lg"
+            onClick={() => {
+              const element = document.querySelector('#contact-section');
+              element?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            무료 상담 신청
+          </Button>
+        </div>
+      </section>
     </div>
-  </div>
-</section>
-
-{/* Footer */}
-<footer className="container mx-auto px-4 py-8 mt-16 border-t">
-  <div className="text-center text-gray-600">
-    <p>© 2024 선물옵션 물타기 전략. All rights reserved.</p>
-  </div>
-</footer>
-</div>
-)
+  );
 }
