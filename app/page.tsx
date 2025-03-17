@@ -10,7 +10,7 @@ import { Gift, TrendingUp, Users } from "lucide-react"
 import { useState } from "react"
 
 // EmailJS 초기화
-emailjs.init("lPUtlOMiUVNhV03bL") // 여기에 Public Key 입력
+emailjs.init(process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!)
 
 interface CalculatorValues {
   initialPrice: string;
@@ -101,14 +101,14 @@ export default function LandingPage() {
     setIsSubmitting(true);
     try {
       await emailjs.send(
-        'service_fwt87xw',  // 여기에 Service ID 입력
-        'template_ahqde8b', // 여기에 Template ID 입력
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
         {
           from_name: contactForm.name,
           from_email: contactForm.email,
           message: contactForm.message,
         },
-        'lPUtlOMiUVNhV03bL'  // 여기에 Public Key 입력
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
       );
       alert('상담 신청이 성공적으로 전송되었습니다.');
       setContactForm({ name: '', email: '', message: '' });
